@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Smart Quiz Generator</title>
+  <style>
+    body { font-family: Arial; padding: 20px; max-width: 800px; margin: auto; }
+    button { padding: 8px 16px; margin: 5px; }
+    .question { margin: 15px 0; }
+    .correct { color: green; }
+    .wrong { color: red; }
+    .result { font-weight: bold; margin-top: 20px; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <h2>AI-Based Quiz App</h2>
+
+  <div>
+    <input type="text" id="topicInput" placeholder="Enter a topic..." size="50">
+    <button onclick="generateSubtopics()">Generate Subtopics</button>
+  </div>
+
+  <div id="subtopicsSection" class="hidden">
+    <h3>Choose a subtopic:</h3>
+    <div id="subtopics"></div>
+  </div>
+
+  <div id="quizSection" class="hidden">
+    <h3>MCQ Quiz</h3>
+    <form id="quizForm"></form>
+    <button onclick="submitQuiz()">Submit Answers</button>
+  </div>
+
+  <div id="resultSection" class="hidden">
+    <div class="result" id="score"></div>
+    <div id="weakTopics"></div>
+  </div>
+
+  <script>
+    const apiBase = "http://127.0.0.1:8000"; // adjust if needed
+    let currentSubtopic = "";
+    let answerRecords = [];
+
+    async function generateSubtopics() {
+      const topic = document.getElementById("topicInput").value;
+      const res = await fetch(`${apiBase}/generate_subtopics`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic })
+      });
+      const data = await res.json();
+
+      const subtopicsDiv = document.getElementById("subtopics");
+      subtopicsDiv.innerHTML = "";
+      data.forEach(item => {
+        const btn = document.createElement("button");
+        btn.textContent = item.title;
+        btn.onclick = () => loadMCQs(item.title);
+        subtopicsDiv.appendChild(btn);
+      });
+
+      document.getElementById("subtopicsSection").classList.remove("hidden");
+      document.getElementById("quizSection").classList.add("hidden");
+      document.getElementById("resultSection").classList.add("hidden");
+    }
+
+    async function loadMCQs(subtopic) {
+      currentSubtopic = subtopic;
+      const res = await fetch(`${apiBase}/generate_mcqs`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subtopic })
+      });
+      const questions = await res.json();
+
+      const quizForm = document.getElementById("quizForm");
+      quizForm.innerHTML = "";
+      questions.forEach((q, index) => {
+        const div = document.createElement("div");
+        div.classList.add("question");
+
+        div.innerHTML += `<p><strong>${index + 1}. ${q.question}</strong></p>`;
+        q.options.forEach((opt, i) => {
+          div.innerHTML += `
+            <label>
+              <input type="radio" name="q${index}" value="${opt}">
+              ${opt}
+            </label><br>`;
+        });
+
+        // store correct answer for validation
+        div.dataset.correct = q.answer;
+        quizForm.appendChild(div);
+      });
+
+      document.getElementById("quizSection").classList.remove("hidden");
+      document.getElementById("resultSection").classList.add("hidden");
+    }
+
+    function submitQuiz() {
+      const questions = document.querySelectorAll(".question");
+      let score = 0;
+      answerRecords = [];
+
+      questions.forEach((q, index) => {
+        const selected = q.querySelector(`input[name="q${index}"]:checked`);
+        const correct = q.dataset.correct;
+
+        if (selected) {
+          const isCorrect = selected.value === correct;
+          if (isCorrect) {
+            score++;
+            selected.parentElement.classList.add("correct");
+          } else {
+            selected.parentElement.classList.add("wrong");
+          }
+
+          answerRecords.push({ subtopic: currentSubtopic, is_correct: isCorrect });
+        }
+      });
+
+      document.getElementById("score").textContent = `Score: ${score} / ${questions.length}`;
+      document.getElementById("resultSection").classList.remove("hidden");
+
+      analyzeWeakness();
+    }
+
+    async function analyzeWeakness() {
+      const res = await fetch(`${apiBase}/analyze_weakness`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(answerRecords)
+      });
+      const data = await res.json();
+
+      const weak = data.weak_topics;
+      const msg = weak.length
+        ? `🧠 You need to review: ${weak.join(", ")}`
+        : `🎉 Great job! No weak subtopics detected.`;
+
+      document.getElementById("weakTopics").innerText = msg;
+    }
+  </script>
+</body>
+</html>
+
+
+
+
+
+<!-- import React, { useState, useEffect } from "react";
+
+// Smart Quiz Generator - React component
+// - Uses Tailwind CSS for styling
+// - Multiple loading visuals (spinner, dots, skeleton, progress)
+// - Generate subtopics, generate MCQs from subtopic or directly from input
+// - On submit, show which answers were wrong and display the correct answer below
+
+export default function SmartQuizGenerator() {
+  const API_BASE = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000";
+
+  const [topicInput, setTopicInput] = useState("");
+  const [subtopics, setSubtopics] = useState([]);
+  const [subtopicsVisible, setSubtopicsVisible] = useState(false);
+
+  const [currentSubtopic, setCurrentSubtopic] = useState("");
+  const [mcqInput, setMcqInput] = useState(""); // for generating MCQ directly
+
+  const [questions, setQuestions] = useState([]);
+  const [answers, setAnswers] = useState({});
+  const [results, setResults] = useState(null);
+
+  const [loading, setLoading] = useState(false);
+  const [loadingStyle, setLoadingStyle] = useState("spinner");
+  const [progress, setProgress] = useState(0);
+
+  // handle fetch with progress simulation for demo
+  const simulateProgress = (duration = 1200) => {
+    setProgress(0);
+    const start = Date.now();
+    return new Promise((resolve) => {
+      const tick = () => {
+        const elapsed = Date.now() - start;
+        const p = Math.min(100, Math.round((elapsed / duration) * 100));
+        setProgress(p);
+        if (p >= 100) return resolve();
+        requestAnimationFrame(tick);
+      };
+      tick();
+    });
+  };
+
+  // Loading UI components
+  const LoadingUI = ({ styleType }) => {
+    switch (styleType) {
+      case "spinner":
+        return (
+          <div className="flex items-center space-x-2">
+            <div className="w-6 h-6 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+            <span>Processing...</span>
+          </div>
+        );
+
+      case "dots":
+        return (
+          <div className="flex items-center space-x-2 text-sm">
+            <span>Processing</span>
+            <span className="loading-dots">.</span>
+            <style>{`
+              .loading-dots{
+                display:inline-block;
+                animation: dots 1s steps(4, end) infinite;
+                width:1.5rem;
+                text-align:left;
+              }
+              @keyframes dots{ 0%{content: ''; } 25%{content: '.';} 50%{content: '..'} 75%{content: '...'} 100%{content: ''}}
+            `}</style>
+          </div>
+        );
+
+      case "skeleton":
+        return (
+          <div className="w-full">
+            <div className="h-6 rounded-md bg-gray-200 animate-pulse mb-2" />
+            <div className="h-6 rounded-md bg-gray-200 animate-pulse w-5/6 mb-2" />
+            <div className="h-6 rounded-md bg-gray-200 animate-pulse w-3/4" />
+          </div>
+        );
+
+      case "progress":
+        return (
+          <div className="w-full">
+            <div className="text-sm mb-1">Generating... {progress}%</div>
+            <div className="w-full h-2 bg-gray-200 rounded">
+              <div className="h-2 rounded" style={{ width: `${progress}%` , background: "linear-gradient(90deg,#3b82f6,#06b6d4)"}} />
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  // Fetch subtopics for a topic
+  const generateSubtopics = async () => {
+    if (!topicInput.trim()) return alert("Please enter a topic first.");
+    try {
+      setLoading(true);
+      await simulateProgress(900);
+      const res = await fetch(`${API_BASE}/generate_subtopics`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic: topicInput })
+      });
+      if (!res.ok) throw new Error("Server error while generating subtopics");
+      const data = await res.json();
+      setSubtopics(Array.isArray(data) ? data : []);
+      setSubtopicsVisible(true);
+      setQuestions([]);
+      setResults(null);
+    } catch (e) {
+      console.error(e);
+      alert("Failed to generate subtopics: " + e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load MCQs from a subtopic
+  const loadMCQsFromSubtopic = async (subtopic) => {
+    setCurrentSubtopic(subtopic);
+    try {
+      setLoading(true);
+      await simulateProgress(1100);
+      const res = await fetch(`${API_BASE}/generate_mcqs`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subtopic })
+      });
+      if (!res.ok) throw new Error("Server error while generating MCQs");
+      const data = await res.json();
+      setQuestions(data || []);
+      setAnswers({});
+      setResults(null);
+    } catch (e) {
+      console.error(e);
+      alert("Failed to load MCQs: " + e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Generate MCQs directly from the input box (not from subtopics)
+  const generateMCQsDirect = async () => {
+    const prompt = mcqInput.trim();
+    if (!prompt) return alert("Type a prompt to generate MCQs directly.");
+    try {
+      setCurrentSubtopic("(Direct) " + prompt);
+      setLoading(true);
+      await simulateProgress(1200);
+      const res = await fetch(`${API_BASE}/generate_mcqs`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subtopic: prompt, direct: true })
+      });
+      if (!res.ok) throw new Error("Server error while generating MCQs");
+      const data = await res.json();
+      setQuestions(data || []);
+      setAnswers({});
+      setResults(null);
+    } catch (e) {
+      console.error(e);
+      alert("Failed to generate MCQs: " + e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle selecting an answer
+  const selectAnswer = (qIndex, option) => {
+    setAnswers(prev => ({ ...prev, [qIndex]: option }));
+  };
+
+  // Submit quiz and compute results
+  const submitQuiz = () => {
+    if (!questions.length) return;
+    const total = questions.length;
+    let score = 0;
+    const records = [];
+    const detailed = questions.map((q, i) => {
+      const selected = answers[i];
+      const isCorrect = selected === q.answer;
+      if (isCorrect) score++;
+      records.push({ subtopic: currentSubtopic, is_correct: isCorrect });
+      return {
+        ...q,
+        selected: selected || null,
+        isCorrect
+      };
+    });
+
+    setResults({ total, score, detailed, records });
+
+    // Optionally send records to backend for weakness analysis
+    analyzeWeakness(records);
+  };
+
+  // analyzeWeakness calls API to get weak_topics (just like original)
+  const analyzeWeakness = async (records) => {
+    try {
+      // show a small loading animation in result area
+      setLoading(true);
+      await simulateProgress(800);
+      const res = await fetch(`${API_BASE}/analyze_weakness`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(records)
+      });
+      if (!res.ok) throw new Error("Server error while analyzing weakness");
+      const data = await res.json();
+      setResults(prev => ({ ...prev, weak_topics: data.weak_topics || [] }));
+    } catch (e) {
+      console.error(e);
+      // If analysis fails, we still show local results
+      setResults(prev => ({ ...prev, weak_topics: [] }));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Small helper to reveal answers beneath wrong answers
+  const AnswerFeedback = ({ q }) => {
+    if (!results) return null;
+    const { selected, isCorrect } = q;
+    if (!selected) {
+      return (
+        <div className="mt-2 text-sm text-yellow-600">You did not select an answer. Correct answer: <span className="font-semibold">{q.answer}</span></div>
+      );
+    }
+    if (isCorrect) {
+      return <div className="mt-2 text-sm text-green-600">Correct ✅</div>;
+    }
+    return (
+      <div className="mt-2 text-sm text-red-600">
+        Wrong ❌ — Your answer: <span className="font-semibold">{selected}</span>
+        <div className="mt-1">Correct answer: <span className="font-semibold">{q.answer}</span></div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="max-w-3xl mx-auto p-6 font-sans">
+      <h2 className="text-2xl font-bold mb-4">AI-Based Smart Quiz (React)</h2>
+
+      <div className="bg-white p-4 rounded shadow-sm mb-4">
+        <label className="block text-sm font-medium mb-1">Enter a topic to generate subtopics</label>
+        <div className="flex gap-2">
+          <input
+            value={topicInput}
+            onChange={e => setTopicInput(e.target.value)}
+            className="flex-1 border px-3 py-2 rounded"
+            placeholder="e.g. Operating Systems"
+          />
+          <button onClick={generateSubtopics} className="px-4 py-2 bg-blue-600 text-white rounded">Generate Subtopics</button>
+        </div>
+
+        <div className="mt-3 flex items-center gap-3">
+          <span className="text-sm text-gray-600">Loading style:</span>
+          <select value={loadingStyle} onChange={e => setLoadingStyle(e.target.value)} className="border rounded px-2 py-1">
+            <option value="spinner">Spinner</option>
+            <option value="dots">Dots</option>
+            <option value="skeleton">Skeleton</option>
+            <option value="progress">Progress bar</option>
+          </select>
+          <span className="text-xs text-gray-500">(preview)</span>
+        </div>
+
+        <div className="mt-3">
+          {loading && <LoadingUI styleType={loadingStyle} />}
+        </div>
+      </div>
+
+      {/* Subtopics */}
+      <div className={`bg-white p-4 rounded shadow-sm mb-4 ${!subtopicsVisible ? "hidden" : "block"}`}>
+        <h3 className="font-semibold mb-2">Choose a subtopic</h3>
+        <div className="flex flex-wrap gap-2">
+          {subtopics.length === 0 && <div className="text-sm text-gray-500">No subtopics yet.</div>}
+          {subtopics.map((s, idx) => (
+            <button key={idx} onClick={() => loadMCQsFromSubtopic(s.title)} className="px-3 py-2 bg-gray-100 rounded hover:bg-gray-200">
+              {s.title}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Direct MCQ generation box */}
+      <div className="bg-white p-4 rounded shadow-sm mb-4">
+        <h3 className="font-semibold mb-2">Generate MCQs directly (without subtopic)</h3>
+        <div className="flex gap-2">
+          <input value={mcqInput} onChange={e => setMcqInput(e.target.value)} placeholder="Write a subtopic or a specific prompt here..." className="flex-1 border px-3 py-2 rounded" />
+          <button onClick={generateMCQsDirect} className="px-4 py-2 bg-green-600 text-white rounded">Generate MCQs</button>
+        </div>
+      </div>
+
+      {/* Quiz area */}
+      <div className={`bg-white p-4 rounded shadow-sm mb-4 ${questions.length ? "block" : "hidden"}`}>
+        <h3 className="font-semibold mb-3">MCQ Quiz {currentSubtopic && <span className="text-sm text-gray-500">— {currentSubtopic}</span>}</h3>
+
+        <div className="space-y-4">
+          {questions.map((q, i) => (
+            <div key={i} className="p-3 border rounded">
+              <div className="font-medium">{i + 1}. {q.question}</div>
+              <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {q.options.map((opt, j) => {
+                  const checked = answers[i] === opt;
+                  const disabled = results !== null; // prevent changing after submit
+                  const optClass = `px-3 py-2 border rounded cursor-pointer ${checked ? 'bg-blue-50 border-blue-300' : 'bg-white'}`;
+                  return (
+                    <label key={j} className={optClass}>
+                      <input
+                        type="radio"
+                        name={`q${i}`}
+                        checked={checked}
+                        disabled={disabled}
+                        onChange={() => selectAnswer(i, opt)}
+                        className="mr-2"
+                      />
+                      <span>{opt}</span>
+                    </label>
+                  );
+                })}
+              </div>
+
+              {/* After submit, show feedback and correct answer if wrong */}
+              {results && (
+                <div className="mt-3">
+                  <AnswerFeedback q={results.detailed[i]} />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-4 flex items-center gap-3">
+          <button onClick={submitQuiz} className="px-4 py-2 bg-indigo-600 text-white rounded">Submit Answers</button>
+
+          <button onClick={() => { setQuestions([]); setResults(null); setAnswers({}); }} className="px-4 py-2 bg-gray-100 rounded">Clear</button>
+
+          <div className="ml-auto text-sm text-gray-600">{loading && <LoadingUI styleType={loadingStyle} />}</div>
+        </div>
+      </div>
+
+      {/* Result area */}
+      <div className={`bg-white p-4 rounded shadow-sm ${!results ? "hidden" : "block"}`}>
+        <h3 className="font-semibold">Result</h3>
+        <div className="mt-2">
+          <div className="text-lg font-bold">Score: {results.score} / {results.total}</div>
+          <div className="mt-2 text-sm text-gray-700">{results.weak_topics && results.weak_topics.length ? `You need to review: ${results.weak_topics.join(", ")}` : `Great job! No weak subtopics detected.`}</div>
+        </div>
+
+        <div className="mt-4">
+          <h4 className="font-medium">Detailed feedback</h4>
+          <ol className="mt-2 list-decimal list-inside">
+            {results.detailed.map((d, idx) => (
+              <li key={idx} className="mt-2">
+                <div className="font-medium">{d.question}</div>
+                <div className="text-sm text-gray-600">Your answer: {d.selected || <em>Not answered</em>} — {d.isCorrect ? <span className="text-green-600">Correct</span> : <span className="text-red-600">Wrong (Correct: {d.answer})</span>}</div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
+
+      <div className="mt-6 text-xs text-gray-500">Notes: This component expects the backend endpoints: POST /generate_subtopics -> [{ title }], POST /generate_mcqs -> [{ question, options: [], answer }], POST /analyze_weakness -> { weak_topics: [] }.</div>
+    </div>
+  );
+} -->
