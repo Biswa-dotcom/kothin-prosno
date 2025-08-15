@@ -1,0 +1,558 @@
+html {
+  scroll-behavior: smooth;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+body {
+  background-color: #e5e5f7;
+  background-image: linear-gradient(
+    to right,
+    rgb(182, 244, 146),
+    rgb(51, 139, 147)
+  );
+  color: white;
+  line-height: 1.6;
+}
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(to right, #4a7c60, #7ca58f);
+  height: 9vh;
+  width: 100vw;
+}
+
+.logo {
+  margin: 2vw;
+  padding: 1vw;
+}
+.logo img {
+  width: 260px;
+  height: 150px;
+  margin-top: 50px;
+  margin-left: 10px;
+}
+
+.button {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  margin: 2vw;
+  padding: 1vw;
+}
+
+.button > .buttons {
+  margin: 10px;
+  padding: 2px;
+  text-decoration: none;
+  color: black;
+  font-weight: bold;
+}
+.theme-button {
+  font-family: "Cerebri Sans";
+  font-size: 12px;
+  background: black;
+  color: white;
+  padding: 10px 15px;
+  display: block;
+  text-transform: uppercase;
+  font-weight: bold;
+  border-radius: 30px;
+  border: none;
+  transition: all 150ms ease-in-out;
+  margin: 0 auto;
+}
+.theme-button:hover {
+  cursor: pointer;
+  color: black;
+  background: white;
+  opacity: 0.9;
+}
+body.dark .change-theme-button:hover {
+  opacity: 0.9;
+}
+body.dark .change-theme-button:hover {
+  opacity: 0.9;
+}
+.hero {
+  background-position: center;
+  background-repeat: no-repeat;
+  background: url(/assets/laurynas-me-1TL8AoEDj_c-unsplash.jpg);
+  height: 100vh;
+  width: 100vw;
+}
+
+.container {
+  background-color: #4a7c601f;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 5rem;
+}
+
+.home {
+  width: 30vw;
+  padding: 2rem 0;
+}
+
+.home > h1 {
+  padding: 1rem 0;
+  font-size: 90px;
+  font-weight: bolder;
+  color: #4a7c60;
+  text-shadow: 0.8px 0.8px #ffffff;
+}
+
+.home > h3 {
+  padding: 1rem 0;
+  color: #4a7c60;
+  font-size: xx-large;
+}
+
+a.Register {
+  text-decoration: none;
+  color: #000000;
+  border: 2px solid #4a7c60;
+  background-color: transparent;
+  padding: 2rem 5rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 1s;
+  font-size: large;
+  font-weight: bold;
+  color: #ffffff;
+  box-shadow: 0.8px 0.8px #ffffff;
+}
+
+a.Register:before {
+  content: "let's go!!";
+  font-weight: bold;
+  color: #000;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #4a7c60;
+  transform: translateY(100%);
+  transition: all 1s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+a.Register:hover:before {
+  transform: translateY(0);
+}
+
+.box1 {
+  background-color: transparent;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.box1 .info {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  width: 80vw;
+}
+
+.box1 .info .icons {
+  color: #4a7c60;
+  border: 2px solid #4a7c60;
+  padding: 20px;
+  margin: 20px;
+  text-align: center;
+}
+.header {
+  background: linear-gradient(to right, #4a7c60, #7ca58f);
+  color: white;
+  text-align: center;
+  padding: 20px;
+  font-size: 24px;
+  font-weight: bold;
+}
+.container2 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 50px;
+  height: 82vh;
+}
+.contact-form,
+.contact-details {
+  width: 40%;
+  padding: 20px;
+  border-radius: 8px;
+}
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #4a7c60;
+  border-radius: 5px;
+}
+.contact-form button {
+  background-color: #4a7c60;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.contact-form button:hover {
+  background-color: #3e6a50;
+}
+.contact-details {
+  text-align: center;
+  background-color: #f5f5f5;
+  color: #3e6a50;
+  padding: 20px;
+  border-radius: 8px;
+}
+.container3 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 50px;
+  height: 82vh;
+}
+.header2 {
+  background: linear-gradient(to right, #4a7c60, #7ca58f);
+  color: white;
+  text-align: center;
+  padding: 20px;
+  font-size: 24px;
+  font-weight: bold;
+}
+.About {
+  background-position: center;
+  background-repeat: no-repeat;
+  background: url(/assets/laurynas-me-1TL8AoEDj_c-unsplash.jpg);
+  height: 100vh;
+  width: 100vw;
+}
+.Us h1 {
+        font-size: clamp(24px, 3vw, 40px);
+        color: #4a7c60;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+.Us p{
+  color: #333;
+  line-height: 1.8;
+  margin-bottom: 10px;
+}
+.faq-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 5px;
+      }
+      
+      .faq-container h1 {
+        text-align: center;
+        font-size: clamp(28px, 3vw, 45px);
+        color: #4a7c60;
+        margin-bottom: 30px;
+      }
+      
+      .faq-item {
+        background-color: rgba(255, 255, 255, 0.8);
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+      }
+      
+      .faq-question {
+        padding: 20px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #333;
+        background-color: #f9f9f9;
+        transition: background-color 0.3s ease;
+      }
+      
+      .faq-question:hover {
+        background-color: #f1f1f1;
+      }
+      
+      .faq-question::after {
+        content: "+";
+        transition: transform 0.3s ease;
+      }
+      
+      .faq-item.active .faq-question::after {
+        transform: rotate(45deg);
+      }
+      
+      .faq-answer {
+        max-height: 0;
+        padding: 0 20px;
+        overflow: hidden;
+        transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out;
+        color: #555;
+      }
+      
+      .faq-item.active .faq-answer {
+        max-height: 100px;
+        padding: 10px;
+      }
+
+.dark {
+  background: black;
+  color: white;
+}
+     body.dark {
+        background-image: linear-gradient(
+          109.6deg,
+          rgba(0, 0, 0, 0.93) 11.2%,
+          rgb(63, 61, 61) 78.9%
+        );
+        color: white;
+      }
+      
+      body.dark .nav {
+        background: linear-gradient(
+          109.6deg,
+          rgba(0, 0, 0, 0.93) 11.2%,
+          rgb(63, 61, 61) 78.9%
+        );
+        color: white;
+      }
+
+      body.dark .button-group > .buttons {
+        color: white;
+      }
+
+      body.dark .theme-button {
+        background: white;
+        color: black;
+      }
+
+      body.dark .theme-button:hover {
+        background: #333;
+        color: white;
+      }
+
+      body.dark .header {
+        background: linear-gradient(
+          109.6deg,
+          rgba(0, 0, 0, 0.93) 11.2%,
+          rgb(63, 61, 61) 78.9%
+        );
+        color: white;
+      }
+    body.dark .header2 {
+        background: linear-gradient(
+          109.6deg,
+          rgba(0, 0, 0, 0.93) 11.2%,
+          rgb(63, 61, 61) 78.9%
+        );
+        color: white;
+      }
+      body.dark .home > h1,
+      body.dark .home > h3 {
+        color: #7ca58f;
+        text-shadow: 0.8px 0.8px #000;
+      }
+
+      body.dark a.Register {
+        border-color: #7ca58f;
+        box-shadow: 0.8px 0.8px #000;
+      }
+
+      body.dark a.Register:before {
+        background: #7ca58f;
+      }
+
+      body.dark .box1 .info .icons {
+        border-color: #7ca58f;
+        color: #7ca58f;
+        background-color: #333;
+      }
+      
+      body.dark .contact-details {
+        background-color: #333;
+        color: #7ca58f;
+      }
+      
+      body.dark .contact-form input,
+      body.dark .contact-form textarea {
+        background-color: #444;
+        border-color: #7ca58f;
+        color: white;
+      }
+
+      body.dark .contact-form button {
+        background-color: #7ca58f;
+      }
+      body.dark .contact-form button:hover {
+        background-color: #6a9578;
+      }
+      body.dark .About,
+      body.dark .FAQ {
+        background: rgba(0, 0, 0, 0.3); /* Slightly transparent dark background */
+        color: white; /* Light text color */
+      }
+      
+      body.dark .Us h1 {
+        color: #7ca58f;
+      }
+      
+      body.dark .Us p {
+        color: #ddd; /* Lighter text for better readability */
+      }
+      
+      body.dark .faq-item {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: #555;
+      }
+      
+      body.dark .faq-question {
+        color: white;
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+      
+      body.dark .faq-question:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+      
+      body.dark .faq-answer {
+        color: #ccc;
+      }
+
+@media (max-width: 768px) {
+  .nav {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .logo {
+    text-align: center;
+    margin: 10px 0;
+  }
+
+  .button {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: 1rem;
+  }
+
+  .button > .buttons {
+    margin: 5px 0;
+    padding: 10px;
+  }
+
+  .container {
+    padding: 3rem;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .home {
+    width: 50vw;
+    text-align: center;
+  }
+
+  .home > h1 {
+    font-size: 50px;
+  }
+
+  .home > h3 {
+    font-size: large;
+  }
+
+  a.Register {
+    padding: 1.5rem 3rem;
+  }
+
+  .box1 .info {
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  .container2 {
+    flex-direction: column;
+    padding: 3rem;
+    justify-content: center;
+    align-items: center;
+  }
+  .contact-form,
+  .contact-details {
+    width: 80%;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    font-size: 1.5rem;
+    text-align: center;
+  }
+
+  .button {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .button > .buttons {
+    margin: 5px 0;
+    padding: 8px;
+    font-size: 1rem;
+  }
+
+  .container {
+    padding: 2rem;
+  }
+
+  .home {
+    width: 80vw;
+    text-align: center;
+  }
+
+  .home > h1 {
+    font-size: 40px;
+  }
+
+  .home > h3 {
+    font-size: medium;
+  }
+
+  a.Register {
+    padding: 1.2rem 2.5rem;
+    font-size: medium;
+  }
+
+  .box1 .info {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .header {
+    font-size: 20px;
+    padding: 15px;
+  }
+  .contact-form,
+  .contact-details {
+    width: 90%;
+  }
+}

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Cognix</title>
+    <link rel="stylesheet" href="stylesheets/style.css">
+  </head>
+  <body cz-shortcut-listen="true">
+
+    <nav class="nav">
+        <div class="logo">
+         <img src="media/project2.png" class="logo" alt="Cognix Logo">
+        </div>
+        <div class="button">
+            <a href="#section1" class="buttons">Home</a>
+            <a href="#section2" class="buttons">About</a>
+            <a href="#section3" class="buttons">Contact Us</a>
+            <a href="/login-page" class="buttons" target="_blank">Login</a>
+               <button class="theme-button">Change Theme</button>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container" id="section1">
+            <div class="home">
+                <h1>Welcome</h1>
+                <h3>Register into your account</h3>
+            </div>
+
+            <a href="/register-page" class="Register" target="_blank">Register</a>
+        </div>
+    </section>
+<section class="About">
+    <div class="header2">About</div>
+    <div class="container3" id="section2">
+        <div class="Us">
+        <h1>🏢 About Us</h1>
+        <p>
+At KOTHIN-PROSNO, we believe learning should be interactive, personalized, and AI-driven.
+Our mission is to help students, professionals, and lifelong learners master any topic through smart, adaptive quizzes.
+<br />
+We combine the power of AI with user-friendly design to deliver:<br />
+Accurate, dynamic question generation<br />
+Instant performance feedback<br />
+Insights into strengths and weaknesses<br />
+We"re passionate about making exam preparation:<br />
+Faster-No more hunting for quality practice questions<br />
+Smarter-AI adapts to your needs<br />
+More engaging-Interactive UI keeps you focused
+</p>
+</div>
+    </div>
+</section>
+<section class="FAQ">
+<div class="faq-container">
+        <h1>Frequently Asked Questions</h1>
+
+        <div class="faq-item">
+            <h2 class="faq-question">1.What is KOTHIN-PROSNO?</h2>
+            <div class="faq-answer">
+                <p>KOTHIN-PROSNO is an AI-powered exam preparation platform that generates 10 MCQs for any chosen topic, evaluates your answers, and helps you improve weak areas.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <h2 class="faq-question">2.How does it generate questions?</h2>
+            <div class="faq-answer">
+                <p>We use Ollama with LLaMA 2 models and custom prompt engineering to create high-quality, relevant MCQs in real-time.</p>
+            </div>
+        </div>
+        <div class="faq-item">
+            <h2 class="faq-question">3.How to use?</h2>
+            <div class="faq-answer">
+                <p>At first sign in sign up then search subtopic in which you have doubt and then choose or select the subtopic on which you want to practice MCQ questions❓</p>
+            </div>
+        </div>
+        <div class="faq-item">
+            <h2 class="faq-question">4.Is it free to use?</h2>
+            <div class="faq-answer">
+                <p>Yes! At this stage, KOTHIN-PROSNO is free to use. Premium features may be introduced later.</p>
+            </div>
+        </div>
+        <div class="faq-item">
+            <h2 class="faq-question">5.Can I practice offline?</h2>
+            <div class="faq-answer">
+                <p>Right now, KOTHIN-PROSNO works online only, as it requires AI model access. Offline practice mode is in our future roadmap.
+</p>
+            </div>
+        </div>
+        <div class="faq-item">
+            <h2 class="faq-question">6.What topics can I search for?</h2>
+            <div class="faq-answer">
+                <p>You can search for any topic — from “Physics” to “Python Programming” — and our AI will generate relevant subtopics and questions.
+</p>
+            </div>
+        </div>
+        <div class="faq-item">
+            <h2 class="faq-question">7.Can I suggest new features?</h2>
+            <div class="faq-answer">
+                <p>Absolutely! We love user feedback. You can open a feature request in our GitHub Issues section.</p>
+            </div>
+        </div>
+        <div class="faq-item">
+            <h2 class="faq-question">8.Is my data safe?</h2>
+            <div class="faq-answer">
+                <p>We don't store personal data at this stage. When account features are added, we'll follow strict data privacy standards.</p>
+            </div>
+        </div>
+</div>
+</section>
+    <section class="contactus">
+        <div class="header">Contact Us</div>
+        <div class="container2" id="section3">
+            <div class="contact-form">
+                <h3>Send Us A Message</h3>
+                <form action="https://api.web3forms.com/submit" method="POST">
+                    <input type="hidden" name="access_key" value="938a877b-d86f-47d4-bf5e-f264cfc71745">
+                    <input type="text" placeholder="First Name" name="First Name" required="">
+                    <input type="text" placeholder="Last Name" name="Last Name" required="">
+                    <input type="email" placeholder="Email" name="email" required="">
+                    <textarea placeholder="Type your message here..." rows="4" name="message" required=""></textarea>
+                    <button type="submit">Submit</button>
+                </form>
+            </div>
+            <div class="contact-details">
+                <h3>Contact Details</h3>
+                <p>Email: tiyasavsnpatra2006@gmail.com</p>
+                <p>Address: Jalpaiguri Govt. Engineerig College, Jalpaiguri, West Bengal</p>
+            </div>
+        </div>
+    </section>
+    <script>
+        function changeTheme() {
+  let body = document.querySelector("body");
+  if (body.classList.contains("dark")) {
+    body.classList.remove("dark");
+  } else {
+    body.classList.add("dark");
+  }
+}
+let themeButton = document.querySelector(".theme-button");
+themeButton.addEventListener("click", changeTheme);
+
+//FAQ
+ document.addEventListener("DOMContentLoaded", () => {
+      const faqItems = document.querySelectorAll(".faq-item");
+      faqItems.forEach(item => {
+        const question = item.querySelector(".faq-question");
+        question.addEventListener("click", () => {
+          item.classList.toggle("active");
+        });
+      });
+       });
+    </script>
+  </body>
+</html>
