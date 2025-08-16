@@ -105,7 +105,7 @@ def generate_subtopics(request: TopicRequest):
 @app.post("/generate_mcqs")
 def generate_mcqs(request: SubtopicRequest):
     prompt = f"""
-    Generate exactly 10 multiple choice questions for the subtopic: "{request.subtopic}".
+    Generate exactly 5 multiple choice questions for the subtopic: "{request.subtopic}".
 
     For each question, include:
     - "question": the question text
