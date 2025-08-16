@@ -1,158 +1,903 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Cognix</title>
-    <link rel="stylesheet" href="stylesheets/style.css">
-  </head>
-  <body cz-shortcut-listen="true">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Cognix - Smart Quiz Generator</title>
+  <link rel="stylesheet" href="stylesheets/style.css">
+  <style>
+    /* Quiz specific styles */
+    .quiz-container {
+      display: none;
+      padding: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .question {
+      margin: 15px 0;
+      padding: 1rem;
+      background: var(--card-bg);
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .correct { color: #4CAF50; }
+    .wrong { color: #F44336; }
+    .result { 
+      font-weight: bold; 
+      margin-top: 20px;
+      padding: 1.5rem;
+      background: var(--card-bg);
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    #topicInput {
+      padding: 1rem;
+      width: 100%;
+      max-width: 500px;
+      border-radius: 8px;
+      border: 2px solid #4682B4; /* Darker blue border */
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      background: white;
+    }
+    
+    .subtopics-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+    
+    .subtopic-btn {
+      margin: 0;
+      padding: 0.8rem 1.5rem;
+      background: linear-gradient(135deg, #4682B4, #5D9CEC);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .subtopic-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+      background: linear-gradient(135deg, #3a6d99, #6CA6F0);
+    }
+    
+    .quiz-option {
+      margin: 0.8rem 0;
+      display: block;
+      padding: 0.5rem;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+    
+    .quiz-option:hover {
+      background: rgba(70, 130, 180, 0.1);
+    }
+    
+    /* Enhanced Button Styles */
+    .btn-primary {
+      background: linear-gradient(135deg, #FF6B6B, #FF8E8E); /* Red gradient */
+      color: white;
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 2rem auto;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+      background: linear-gradient(135deg, #FF7B7B, #FF9E9E);
+    }
+    
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+    
+    /* Navbar Quiz Button */
+    .nav-quiz-btn {
+      background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+      color: white;
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      margin-left: 1rem;
+    }
+    
+    .nav-quiz-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+      background: linear-gradient(135deg, #FF7B7B, #FF9E9E);
+    }
+    
+    /* Loading State */
+    .loading {
+      position: relative;
+      pointer-events: none;
+      opacity: 0.8;
+    }
+    
+    .loading::after {
+      content: "";
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      margin: auto;
+      border: 3px solid transparent;
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Progress Indicator */
+    .progress-text {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+    
+    /* Animation for generated subtopics */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .subtopic-btn {
+      animation: fadeIn 0.3s ease forwards;
+    }
+    
+    /* Hero Section Adjustments */
+    .hero .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 60vh;
+      padding-bottom: 3rem;
+    }
+    
+    .hero .home {
+      margin-bottom: 2rem;
+    }
+     
+     /* Hero Section */
+/* Hero Section */
+.hero {
+  background: linear-gradient(135deg, #eefff9, #e0fff1);
+  text-align: center;
+  padding: 120px 20px;
+  border-radius: 0 0 40px 40px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
-    <nav class="nav">
-        <div class="logo">
-         <img src="media/project2.png" class="logo" alt="Cognix Logo">
-        </div>
-        <div class="button">
-            <a href="#section1" class="buttons">Home</a>
-            <a href="#section2" class="buttons">About</a>
-            <a href="#section3" class="buttons">Contact Us</a>
-            <a href="/login-page" class="buttons" target="_blank">Login</a>
-               <button class="theme-button">Change Theme</button>
-        </div>
-    </nav>
+.hero .container {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-    <section class="hero">
-        <div class="container" id="section1">
-            <div class="home">
-                <h1>Welcome</h1>
-                <h3>Register into your account</h3>
-            </div>
+.hero .home {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
 
-            <a href="/register-page" class="Register" target="_blank">Register</a>
-        </div>
-    </section>
-<section class="About">
-    <div class="header2">About</div>
-    <div class="container3" id="section2">
-        <div class="Us">
-        <h1>🏢 About Us</h1>
-        <p>
-At KOTHIN-PROSNO, we believe learning should be interactive, personalized, and AI-driven.
-Our mission is to help students, professionals, and lifelong learners master any topic through smart, adaptive quizzes.
-<br />
-We combine the power of AI with user-friendly design to deliver:<br />
-Accurate, dynamic question generation<br />
-Instant performance feedback<br />
-Insights into strengths and weaknesses<br />
-We"re passionate about making exam preparation:<br />
-Faster-No more hunting for quality practice questions<br />
-Smarter-AI adapts to your needs<br />
-More engaging-Interactive UI keeps you focused
-</p>
-</div>
-    </div>
-</section>
-<section class="FAQ">
-<div class="faq-container">
-        <h1>Frequently Asked Questions</h1>
+/* Hero Title */
+.hero-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
 
-        <div class="faq-item">
-            <h2 class="faq-question">1.What is KOTHIN-PROSNO?</h2>
-            <div class="faq-answer">
-                <p>KOTHIN-PROSNO is an AI-powered exam preparation platform that generates 10 MCQs for any chosen topic, evaluates your answers, and helps you improve weak areas.</p>
-            </div>
-        </div>
+.welcome-text {
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: #1e293b;
+  letter-spacing: 1px;
+  opacity: 0.9;
+  transform: translateY(10px);
+  animation: fadeInDown 0.8s ease forwards;
+  position: relative;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
 
-        <div class="faq-item">
-            <h2 class="faq-question">2.How does it generate questions?</h2>
-            <div class="faq-answer">
-                <p>We use Ollama with LLaMA 2 models and custom prompt engineering to create high-quality, relevant MCQs in real-time.</p>
-            </div>
-        </div>
-        <div class="faq-item">
-            <h2 class="faq-question">3.How to use?</h2>
-            <div class="faq-answer">
-                <p>At first sign in sign up then search subtopic in which you have doubt and then choose or select the subtopic on which you want to practice MCQ questions❓</p>
-            </div>
-        </div>
-        <div class="faq-item">
-            <h2 class="faq-question">4.Is it free to use?</h2>
-            <div class="faq-answer">
-                <p>Yes! At this stage, KOTHIN-PROSNO is free to use. Premium features may be introduced later.</p>
-            </div>
-        </div>
-        <div class="faq-item">
-            <h2 class="faq-question">5.Can I practice offline?</h2>
-            <div class="faq-answer">
-                <p>Right now, KOTHIN-PROSNO works online only, as it requires AI model access. Offline practice mode is in our future roadmap.
-</p>
-            </div>
-        </div>
-        <div class="faq-item">
-            <h2 class="faq-question">6.What topics can I search for?</h2>
-            <div class="faq-answer">
-                <p>You can search for any topic — from “Physics” to “Python Programming” — and our AI will generate relevant subtopics and questions.
-</p>
-            </div>
-        </div>
-        <div class="faq-item">
-            <h2 class="faq-question">7.Can I suggest new features?</h2>
-            <div class="faq-answer">
-                <p>Absolutely! We love user feedback. You can open a feature request in our GitHub Issues section.</p>
-            </div>
-        </div>
-        <div class="faq-item">
-            <h2 class="faq-question">8.Is my data safe?</h2>
-            <div class="faq-answer">
-                <p>We don't store personal data at this stage. When account features are added, we'll follow strict data privacy standards.</p>
-            </div>
-        </div>
-</div>
-</section>
-    <section class="contactus">
-        <div class="header">Contact Us</div>
-        <div class="container2" id="section3">
-            <div class="contact-form">
-                <h3>Send Us A Message</h3>
-                <form action="https://api.web3forms.com/submit" method="POST">
-                    <input type="hidden" name="access_key" value="938a877b-d86f-47d4-bf5e-f264cfc71745">
-                    <input type="text" placeholder="First Name" name="First Name" required="">
-                    <input type="text" placeholder="Last Name" name="Last Name" required="">
-                    <input type="email" placeholder="Email" name="email" required="">
-                    <textarea placeholder="Type your message here..." rows="4" name="message" required=""></textarea>
-                    <button type="submit">Submit</button>
-                </form>
-            </div>
-            <div class="contact-details">
-                <h3>Contact Details</h3>
-                <p>Email: tiyasavsnpatra2006@gmail.com</p>
-                <p>Address: Jalpaiguri Govt. Engineerig College, Jalpaiguri, West Bengal</p>
-            </div>
-        </div>
-    </section>
-    <script>
-        function changeTheme() {
-  let body = document.querySelector("body");
-  if (body.classList.contains("dark")) {
-    body.classList.remove("dark");
-  } else {
-    body.classList.add("dark");
+/* Welcome to hover effect */
+.welcome-text:hover {
+  color: #4f46e5;
+  transform: scale(1.05) translateY(10px);
+  text-shadow: 0 0 15px rgba(79, 70, 229, 0.2);
+}
+
+.welcome-text:hover::after {
+  content: "👋";
+  position: absolute;
+  right: -40px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.8rem;
+  opacity: 0;
+  animation: waveIn 0.5s ease-out forwards;
+}
+
+.cognix-text {
+  font-size: 4.5rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, #4f46e5, #8b5cf6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  line-height: 1;
+  position: relative;
+  padding: 0 1rem;
+  animation: fadeInUp 0.8s ease 0.2s forwards;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.cognix-text::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 4px;
+  background: linear-gradient(90deg, #4f46e5, #8b5cf6);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.cognix-text:hover {
+  transform: scale(1.02);
+  text-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+}
+
+.cognix-text:hover::after {
+  width: 80%;
+}
+
+/* Hero Subtitle */
+.hero-subtitle {
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: #475569;
+  letter-spacing: 0.5px;
+  margin-top: 1.5rem;
+  opacity: 0;
+  animation: fadeIn 0.8s ease 0.4s forwards;
+  position: relative;
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.4s ease;
+}
+
+/* Subtitle hover effect */
+.hero-subtitle:hover {
+  color: #4f46e5;
+  background: rgba(79, 70, 229, 0.1);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(79, 70, 229, 0.1);
+}
+
+.hero-subtitle::before {
+  content: "✨";
+  position: absolute;
+  left: -30px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.hero-subtitle::after {
+  content: "✨";
+  position: absolute;
+  right: -30px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.hero-subtitle:hover::before,
+.hero-subtitle:hover::after {
+  opacity: 1;
+  transform: translateY(-50%) rotate(15deg);
+}
+
+/* Animations */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
-let themeButton = document.querySelector(".theme-button");
-themeButton.addEventListener("click", changeTheme);
 
-//FAQ
- document.addEventListener("DOMContentLoaded", () => {
-      const faqItems = document.querySelectorAll(".faq-item");
-      faqItems.forEach(item => {
-        const question = item.querySelector(".faq-question");
-        question.addEventListener("click", () => {
-          item.classList.toggle("active");
-        });
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes waveIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) rotate(-30deg);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-50%) rotate(15deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(-50%) rotate(0);
+  }
+}
+
+.btn-primary {
+  padding: 14px 28px;
+  background: #e55e46;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.btn-primary:hover {
+  background: #4338ca;
+}
+
+
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .btn-primary {
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+      }
+      
+      .nav-quiz-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+      }
+      
+      .hero .container {
+        min-height: 50vh;
+      }
+    }
+    
+    .about-section {
+      background: linear-gradient(135deg, #f9fafb, #eef2ff);
+      padding: 80px 20px;
+      text-align: center;
+      border-radius: 20px;
+      margin: 60px auto;
+      max-width: 1100px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    .about-header h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 10px;
+    }
+
+    .about-header h2 span {
+      color: #4f46e5;
+    }
+
+    .about-header .tagline {
+      font-size: 1.2rem;
+      color: #64748b;
+      margin-bottom: 40px;
+      font-style: italic;
+    }
+
+    .about-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .about-content {
+      max-width: 750px;
+      text-align: left;
+      font-size: 1.1rem;
+      line-height: 1.8;
+      color: #374151;
+    }
+
+    .about-content .highlight {
+      color: #4f46e5;
+      font-weight: 600;
+    }
+
+    .features, .benefits {
+      margin: 20px 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .features li, .benefits li {
+      background: #fff;
+      margin: 10px 0;
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: 1rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .features li:hover, .benefits li:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+    }
+
+    .benefits span {
+      font-weight: 600;
+      color: #4f46e5;
+    }
+
+
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="nav">
+    <div class="logo">
+      <img src="media/project2.png" class="logo-img" alt="Cognix Logo">
+    </div>
+    <div class="button">
+      <a href="#section1" class="buttons">Home</a>
+      <a href="#section2" class="buttons">About</a>
+      <a href="#section3" class="buttons">Contact Us</a>
+      <button class="nav-quiz-btn" id="navQuizBtn">
+        <span>🎯 Start Quiz</span>
+      </button>
+      <button class="theme-button">Change Theme</button>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <!-- Hero Section -->
+<!-- Hero Section -->
+<section class="hero" id="section1">
+  <div class="container">
+    <div class="home">
+      <h1 class="hero-title">
+        <span class="welcome-text">Welcome to</span>
+        <span class="cognix-text">COGNIX</span>
+      </h1>
+      <h3 class="hero-subtitle">AI-Powered Smart Quiz Generator</h3>
+    </div>
+    <button class="btn-primary" id="heroQuizBtn">
+      <span>Start Quiz Now</span>
+    </button>
+  </div>
+</section>
+
+
+  <!-- Quiz Section -->
+  <section class="quiz-container" id="quiz-section">
+    <div id="topic-selection">
+      <h2>AI Quiz Generator</h2>
+      <p>Enter any topic to generate personalized quiz questions:</p>
+      
+      <div style="display: flex; gap: 0.6rem; align-items: center;">
+        <input type="text" id="topicInput" placeholder="e.g. Physics, World History, Python Programming...">
+        <button class="btn-primary" id="generateSubtopicsBtn" style="background: linear-gradient(135deg, #4682B4, #5D9CEC);">
+          <span>🔍 Generate Subtopics</span>
+        </button>
+      </div>
+      
+      <div id="progressText" class="progress-text" style="display: none;"></div>
+
+      <div id="subtopicsSection" style="display: none;">
+        <h3>Choose a subtopic:</h3>
+        <div class="subtopics-container" id="subtopics"></div>
+      </div>
+    </div>
+
+    <div id="quizSection" style="display: none;">
+      <h3>📝 MCQ Quiz</h3>
+      <form id="quizForm"></form>
+      <button class="btn-primary" id="submitQuizBtn" style="background: linear-gradient(135deg, #4682B4, #5D9CEC);">
+        <span>📤 Submit Answers</span>
+      </button>
+    </div>
+
+    <div id="resultSection" style="display: none;">
+      <div class="result" id="score"></div>
+      <div id="weakTopics"></div>
+      <button class="btn-primary" id="restartQuizBtn">
+        <span>🔄 Start New Quiz</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- About Section -->
+<section class="about-section" id="section2">
+  <div class="about-header">
+    <h2>About <span>COGNIX</span></h2>
+    <p class="tagline">Smarter Learning. Faster Results.</p>
+  </div>
+
+  <div class="about-container">
+    <div class="about-content">
+      <p>
+        At <strong>COGNIX</strong>, we believe learning should be 
+        <span class="highlight">interactive</span>, 
+        <span class="highlight">personalized</span>, 
+        and <span class="highlight">AI-driven</span>.
+      </p>
+      <p>
+        Our mission is to empower students, professionals, and lifelong learners to 
+        master any topic with <strong>smart, adaptive quizzes</strong>.
+      </p>
+
+      <ul class="features">
+        <li>⚡ <strong>Accurate & dynamic</strong> question generation</li>
+        <li>📊 <strong>Instant feedback</strong> to track progress</li>
+        <li>🎯 <strong>Insights</strong> into strengths & weaknesses</li>
+      </ul>
+
+      <p>
+        We make exam preparation:
+      </p>
+      <ul class="benefits">
+        <li><span>🚀 Faster</span>  No more hunting for quality practice questions</li>
+        <li><span>🧠 Smarter</span>  AI adapts to your learning style</li>
+        <li><span>🎮 Engaging</span> Interactive UI keeps you motivated</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+
+
+  <!-- FAQ Section -->
+  <section class="FAQ">
+    <div class="faq-container">
+      <h1>Frequently Asked Questions</h1>
+      <div class="faq-item">
+        <h2 class="faq-question">1. What is COGNIX?</h2>
+        <div class="faq-answer">
+          <p>COGNIX is an AI-powered exam preparation platform that generates 10 MCQs for any chosen topic, evaluates your answers, and helps you improve weak areas.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <h2 class="faq-question">2. How does it generate questions?</h2>
+        <div class="faq-answer">
+          <p>We use Ollama with LLaMA 2 models and custom prompt engineering to create high-quality, relevant MCQs in real-time.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <h2 class="faq-question">3. How to use?</h2>
+        <div class="faq-answer">
+          <p>Simply click "Start Quiz", enter a topic, select a subtopic, and begin answering the generated questions.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <h2 class="faq-question">4. Is it free to use?</h2>
+        <div class="faq-answer">
+          <p>Yes! At this stage, COGNIX is free to use. Premium features may be introduced later.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <h2 class="faq-question">5. Can I practice offline?</h2>
+        <div class="faq-answer">
+          <p>Right now, COGNIX works online only, as it requires AI model access. Offline practice mode is in our future roadmap.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="contactus" id="section3">
+    <div class="header">Contact Us</div>
+    <div class="container2">
+      <div class="contact-form">
+        <h3>Send Us A Message</h3>
+        <form action="https://api.web3forms.com/submit" method="POST">
+          <input type="hidden" name="access_key" value="938a877b-d86f-47d4-bf5e-f264cfc71745">
+          <input type="text" placeholder="First Name" name="First Name" required>
+          <input type="text" placeholder="Last Name" name="Last Name" required>
+          <input type="email" placeholder="Email" name="email" required>
+          <textarea placeholder="Type your message here..." rows="4" name="message" required></textarea>
+          <button type="submit" class="btn">Submit</button>
+        </form>
+      </div>
+      <div class="contact-details">
+        <h3>Contact Details</h3>
+        <p>Email: tiyasavsnpatra2006@gmail.com</p>
+        <p>Address: Jalpaiguri Govt. Engineering College, Jalpaiguri, West Bengal</p>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Theme toggle
+    document.querySelector(".theme-button").addEventListener("click", function() {
+      document.body.classList.toggle("dark");
+    });
+
+    // FAQ toggle
+    document.querySelectorAll(".faq-question").forEach(q => {
+      q.addEventListener("click", () => {
+        q.parentElement.classList.toggle("active");
       });
-       });
-    </script>
-  </body>
+    });
+
+    // Quiz functionality
+    const apiBase = "http://127.0.0.1:8000"; // adjust if needed
+    let currentSubtopic = "";
+    let answerRecords = [];
+    let generationTime = 0;
+
+    // Show quiz section when Start Quiz is clicked
+    function showQuizSection() {
+      document.querySelector('.quiz-container').style.display = 'block';
+      window.location.href = '#quiz-section';
+      document.getElementById('topic-selection').style.display = 'block';
+      document.getElementById('quizSection').style.display = 'none';
+      document.getElementById('resultSection').style.display = 'none';
+      document.getElementById('topicInput').focus();
+    }
+
+    document.getElementById('navQuizBtn').addEventListener('click', showQuizSection);
+    document.getElementById('heroQuizBtn').addEventListener('click', showQuizSection);
+
+    async function generateSubtopics() {
+      const topic = document.getElementById("topicInput").value.trim();
+      if (!topic) {
+        alert("Please enter a topic");
+        return;
+      }
+
+      const btn = document.getElementById("generateSubtopicsBtn");
+      const originalText = btn.innerHTML;
+      btn.classList.add("loading");
+      btn.innerHTML = '<span></span>'; // Empty span for loading animation
+      
+      const progressText = document.getElementById("progressText");
+      progressText.style.display = "block";
+      progressText.textContent = "Generating subtopics... (usually takes 5-10 seconds)";
+      
+      const startTime = Date.now();
+
+      try {
+        const res = await fetch(`${apiBase}/generate_subtopics`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ topic })
+        });
+        
+        generationTime = (Date.now() - startTime) / 1000;
+        const data = await res.json();
+
+        const subtopicsDiv = document.getElementById("subtopics");
+        subtopicsDiv.innerHTML = "";
+        
+        // Animate each subtopic button with delay
+        data.forEach((item, index) => {
+          setTimeout(() => {
+            const btn = document.createElement("button");
+            btn.className = "subtopic-btn";
+            btn.innerHTML = `<span>${item.title}</span>`;
+            btn.onclick = () => loadMCQs(item.title);
+            subtopicsDiv.appendChild(btn);
+          }, index * 100);
+        });
+
+        document.getElementById("subtopicsSection").style.display = "block";
+        progressText.textContent = `Generated ${data.length} subtopics in ${generationTime.toFixed(1)} seconds`;
+        
+      } catch (error) {
+        console.error("Error generating subtopics:", error);
+        progressText.textContent = "Failed to generate subtopics. Please try again.";
+      } finally {
+        btn.classList.remove("loading");
+        btn.innerHTML = originalText;
+      }
+    }
+
+    async function loadMCQs(subtopic) {
+      currentSubtopic = subtopic;
+      const btn = document.getElementById("generateSubtopicsBtn");
+      const originalText = btn.innerHTML;
+      btn.classList.add("loading");
+      btn.innerHTML = '<span></span>';
+      
+      const progressText = document.getElementById("progressText");
+      progressText.textContent = `Generating questions about ${subtopic}...`;
+
+      try {
+        const res = await fetch(`${apiBase}/generate_mcqs`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ subtopic })
+        });
+        const questions = await res.json();
+
+        const quizForm = document.getElementById("quizForm");
+        quizForm.innerHTML = "";
+        
+        questions.forEach((q, index) => {
+          const div = document.createElement("div");
+          div.className = "question";
+
+          div.innerHTML += `<p><strong>${index + 1}. ${q.question}</strong></p>`;
+          q.options.forEach((opt, i) => {
+            div.innerHTML += `
+              <label class="quiz-option">
+                <input type="radio" name="q${index}" value="${opt}">
+                ${opt}
+              </label>`;
+          });
+
+          div.dataset.correct = q.answer;
+          quizForm.appendChild(div);
+        });
+
+        document.getElementById("topic-selection").style.display = "none";
+        document.getElementById("quizSection").style.display = "block";
+        progressText.textContent = `Generated ${questions.length} questions in ${generationTime.toFixed(1)} seconds`;
+        
+      } catch (error) {
+        console.error("Error loading MCQs:", error);
+        progressText.textContent = "Failed to load questions. Please try again.";
+      } finally {
+        btn.classList.remove("loading");
+        btn.innerHTML = originalText;
+      }
+    }
+
+    function submitQuiz() {
+      const questions = document.querySelectorAll(".question");
+      let score = 0;
+      answerRecords = [];
+
+      questions.forEach((q, index) => {
+        const selected = q.querySelector(`input[name="q${index}"]:checked`);
+        const correct = q.dataset.correct;
+
+        if (selected) {
+          const isCorrect = selected.value === correct;
+          if (isCorrect) {
+            score++;
+            selected.parentElement.classList.add("correct");
+          } else {
+            selected.parentElement.classList.add("wrong");
+          }
+
+          answerRecords.push({ subtopic: currentSubtopic, is_correct: isCorrect });
+        }
+      });
+
+      document.getElementById("score").innerHTML = `
+        <h3>📊 Quiz Results</h3>
+        <p>Your score: <strong>${score} / ${questions.length}</strong> (${Math.round(score/questions.length*100)}%)</p>
+      `;
+      
+      analyzeWeakness();
+      document.getElementById("quizSection").style.display = "none";
+      document.getElementById("resultSection").style.display = "block";
+      window.location.href = '#quiz-section';
+    }
+
+    async function analyzeWeakness() {
+      try {
+        const res = await fetch(`${apiBase}/analyze_weakness`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(answerRecords)
+        });
+        const data = await res.json();
+
+        const weak = data.weak_topics || [];
+        const msg = weak.length
+          ? `<div style="margin-top: 1rem;">
+              <h4>📌 Areas to Improve</h4>
+              <ul style="margin-top: 0.5rem;">${weak.map(t => `<li>${t}</li>`).join('')}</ul>
+             </div>`
+          : `<p style="margin-top: 1rem;">🎉 Excellent! You've mastered all the concepts!</p>`;
+
+        document.getElementById("weakTopics").innerHTML = msg;
+      } catch (error) {
+        console.error("Error analyzing weakness:", error);
+        document.getElementById("weakTopics").innerHTML = 
+          "<p>Could not analyze weak topics at this time.</p>";
+      }
+    }
+
+    function restartQuiz() {
+      document.getElementById("topicInput").value = "";
+      document.getElementById("topic-selection").style.display = "block";
+      document.getElementById("subtopicsSection").style.display = "none";
+      document.getElementById("quizSection").style.display = "none";
+      document.getElementById("resultSection").style.display = "none";
+      document.getElementById("progressText").textContent = "";
+      window.location.href = '#quiz-section';
+    }
+
+    // Event listeners for buttons
+    document.getElementById("generateSubtopicsBtn").addEventListener("click", generateSubtopics);
+    document.getElementById("submitQuizBtn").addEventListener("click", submitQuiz);
+    document.getElementById("restartQuizBtn").addEventListener("click", restartQuiz);
+
+    // Allow pressing Enter in topic input
+    document.getElementById("topicInput").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        generateSubtopics();
+      }
+    });
+  </script>
+</body>
 </html>
