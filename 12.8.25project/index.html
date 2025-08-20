@@ -7,20 +7,185 @@
   <title>Cognix - Smart Quiz Generator</title>
   <link rel="stylesheet" href="stylesheets/style.css">
   <style>
+    /* Reset and Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8fafc;
+      color: #1e293b;
+    }
+
+    /* 3D Cube Styles */
+    .cube-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 200px;
+      height: 200px;
+      perspective: 1000px;
+      z-index: 1;
+    }
+
+    .box-card {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: rotate3d 20s infinite linear;
+    }
+
+    .face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.3rem;
+      font-weight: bold;
+      backface-visibility: visible;
+      border-radius: 12px;
+      background: linear-gradient(145deg, rgba(42,42,42,0.8), rgba(56,56,56,0.8));
+      border: 2px solid #646cff;
+      overflow: hidden;
+      text-align: center;
+      padding: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    /* Cube Face Positions */
+    .front { transform: translateZ(100px); }
+    .back { transform: translateZ(-100px) rotateY(180deg); }
+    .right { transform: translateX(100px) rotateY(90deg); }
+    .left { transform: translateX(-100px) rotateY(-90deg); }
+    .top { transform: translateY(-100px) rotateX(90deg); }
+    .bottom { transform: translateY(100px) rotateX(-90deg); }
+
+    /* Glow Effects */
+    .front { border-color: #646cff; color: #646cff; }
+    .back { border-color: #00bcd4; color: #00bcd4; }
+    .right { border-color: #4caf50; color: #4caf50; }
+    .left { border-color: #ff4081; color: #ff4081; }
+    .top { border-color: #ffc107; color: #ffc107; }
+    .bottom { border-color: #9c27b0; color: #9c27b0; }
+
+    @keyframes rotate3d {
+      0%   { transform: rotateX(0) rotateY(0); }
+      25%  { transform: rotateX(90deg) rotateY(90deg); }
+      50%  { transform: rotateX(180deg) rotateY(180deg); }
+      75%  { transform: rotateX(270deg) rotateY(270deg); }
+      100% { transform: rotateX(360deg) rotateY(360deg); }
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, #eefff2, #e0ffec);
+      text-align: center;
+      padding: 120px 20px;
+      position: relative;
+      overflow: hidden;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .hero .container {
+      position: relative;
+      z-index: 2;
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .hero-title {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .welcome-text {
+      font-size: 2.2rem;
+      font-weight: 600;
+      color: #1e293b;
+      letter-spacing: 1px;
+      animation: fadeInDown 0.8s ease forwards;
+    }
+
+    .cognix-text {
+      font-size: 5rem;
+      font-weight: 800;
+      background: linear-gradient(270deg, #4f46e5, #8b5cf6, #ec4899, #f59e0b);
+      background-size: 400% 400%;
+      -webkit-background-clip: text;
+      color: transparent;
+      line-height: 1.1;
+      animation: gradientFlow 6s ease infinite, fadeInUp 1s ease 0.5s forwards;
+      opacity: 0;
+      text-shadow: 0 4px 20px rgba(79, 70, 229, 0.3);
+    }
+
+    .hero-subtitle {
+      font-size: 1.4rem;
+      font-weight: 500;
+      color: #475569;
+      letter-spacing: 0.5px;
+      margin-top: 1.5rem;
+      animation: fadeIn 0.8s ease 0.4s forwards;
+      opacity: 0;
+    }
+
+    /* Animations */
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
     /* Quiz specific styles */
     .quiz-container {
       display: none;
       padding: 2rem;
       max-width: 800px;
       margin: 0 auto;
+      position: relative;
+      z-index: 2;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
     
     .question {
       margin: 15px 0;
       padding: 1rem;
-      background: var(--card-bg);
+      background: #f8fafc;
       border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
     
     .correct { color: #4CAF50; }
@@ -29,9 +194,9 @@
       font-weight: bold; 
       margin-top: 20px;
       padding: 1.5rem;
-      background: var(--card-bg);
+      background: #f8fafc;
       border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
     
     #topicInput {
@@ -39,7 +204,7 @@
       width: 100%;
       max-width: 500px;
       border-radius: 8px;
-      border: 2px solid #4682B4; /* Darker blue border */
+      border: 2px solid #4682B4;
       font-size: 1rem;
       margin-bottom: 1rem;
       background: white;
@@ -66,27 +231,9 @@
       box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     
-    .subtopic-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 8px rgba(0,0,0,0.15);
-      background: linear-gradient(135deg, #3a6d99, #6CA6F0);
-    }
-    
-    .quiz-option {
-      margin: 0.8rem 0;
-      display: block;
-      padding: 0.5rem;
-      border-radius: 6px;
-      transition: background 0.2s;
-    }
-    
-    .quiz-option:hover {
-      background: rgba(70, 130, 180, 0.1);
-    }
-    
-    /* Enhanced Button Styles */
+    /* Button Styles */
     .btn-primary {
-      background: linear-gradient(135deg, #FF6B6B, #FF8E8E); /* Red gradient */
+      background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
       color: white;
       padding: 1rem 2rem;
       font-size: 1.2rem;
@@ -109,10 +256,6 @@
       background: linear-gradient(135deg, #FF7B7B, #FF9E9E);
     }
     
-    .btn-primary:active {
-      transform: translateY(0);
-    }
-    
     /* Navbar Quiz Button */
     .nav-quiz-btn {
       background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
@@ -133,7 +276,7 @@
       box-shadow: 0 6px 8px rgba(0,0,0,0.15);
       background: linear-gradient(135deg, #FF7B7B, #FF9E9E);
     }
-    
+
     /* Loading State */
     .loading {
       position: relative;
@@ -166,271 +309,11 @@
     .progress-text {
       margin-top: 1rem;
       font-size: 0.9rem;
-      color: var(--text-secondary);
+      color: #64748b;
       text-align: center;
     }
-    
-    /* Animation for generated subtopics */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .subtopic-btn {
-      animation: fadeIn 0.3s ease forwards;
-    }
-    
-    /* Hero Section Adjustments */
-    .hero .container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      min-height: 60vh;
-      padding-bottom: 3rem;
-    }
-    
-    .hero .home {
-      margin-bottom: 2rem;
-    }
-     
-     /* Hero Section */
-/* Hero Section */
-.hero {
-  background: linear-gradient(135deg, #eefff9, #e0fff1);
-  text-align: center;
-  padding: 120px 20px;
-  border-radius: 0 0 40px 40px;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
 
-.hero .container {
-  max-width: 1000px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.hero .home {
-  margin-bottom: 2.5rem;
-  text-align: center;
-}
-
-/* Hero Title */
-.hero-title {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.welcome-text {
-  font-size: 2.2rem;
-  font-weight: 600;
-  color: #1e293b;
-  letter-spacing: 1px;
-  opacity: 0.9;
-  transform: translateY(10px);
-  animation: fadeInDown 0.8s ease forwards;
-  position: relative;
-  display: inline-block;
-  transition: all 0.3s ease;
-}
-
-/* Welcome to hover effect */
-.welcome-text:hover {
-  color: #4f46e5;
-  transform: scale(1.05) translateY(10px);
-  text-shadow: 0 0 15px rgba(79, 70, 229, 0.2);
-}
-
-.welcome-text:hover::after {
-  content: "👋";
-  position: absolute;
-  right: -40px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 1.8rem;
-  opacity: 0;
-  animation: waveIn 0.5s ease-out forwards;
-}
-
-.cognix-text {
-  font-size: 4.5rem;
-  font-weight: 800;
-  background: linear-gradient(90deg, #4f46e5, #8b5cf6);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  line-height: 1;
-  position: relative;
-  padding: 0 1rem;
-  animation: fadeInUp 0.8s ease 0.2s forwards;
-  opacity: 0;
-  transition: all 0.3s ease;
-}
-
-.cognix-text::after {
-  content: "";
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60%;
-  height: 4px;
-  background: linear-gradient(90deg, #4f46e5, #8b5cf6);
-  border-radius: 2px;
-  transition: width 0.3s ease;
-}
-
-.cognix-text:hover {
-  transform: scale(1.02);
-  text-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
-}
-
-.cognix-text:hover::after {
-  width: 80%;
-}
-
-/* Hero Subtitle */
-.hero-subtitle {
-  font-size: 1.4rem;
-  font-weight: 500;
-  color: #475569;
-  letter-spacing: 0.5px;
-  margin-top: 1.5rem;
-  opacity: 0;
-  animation: fadeIn 0.8s ease 0.4s forwards;
-  position: relative;
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  transition: all 0.4s ease;
-}
-
-/* Subtitle hover effect */
-.hero-subtitle:hover {
-  color: #4f46e5;
-  background: rgba(79, 70, 229, 0.1);
-  transform: translateY(-3px);
-  box-shadow: 0 10px 20px rgba(79, 70, 229, 0.1);
-}
-
-.hero-subtitle::before {
-  content: "✨";
-  position: absolute;
-  left: -30px;
-  top: 50%;
-  transform: translateY(-50%);
-  opacity: 0;
-  transition: all 0.3s ease;
-}
-
-.hero-subtitle::after {
-  content: "✨";
-  position: absolute;
-  right: -30px;
-  top: 50%;
-  transform: translateY(-50%);
-  opacity: 0;
-  transition: all 0.3s ease;
-}
-
-.hero-subtitle:hover::before,
-.hero-subtitle:hover::after {
-  opacity: 1;
-  transform: translateY(-50%) rotate(15deg);
-}
-
-/* Animations */
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes waveIn {
-  0% {
-    opacity: 0;
-    transform: translateY(-50%) rotate(-30deg);
-  }
-  70% {
-    opacity: 1;
-    transform: translateY(-50%) rotate(15deg);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(-50%) rotate(0);
-  }
-}
-
-.btn-primary {
-  padding: 14px 28px;
-  background: #e55e46;
-  color: #fff;
-  font-size: 1rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.btn-primary:hover {
-  background: #4338ca;
-}
-
-
-
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      .btn-primary {
-        padding: 0.8rem 1.5rem;
-        font-size: 1rem;
-      }
-      
-      .nav-quiz-btn {
-        padding: 0.6rem 1rem;
-        font-size: 0.9rem;
-      }
-      
-      .hero .container {
-        min-height: 50vh;
-      }
-    }
-    
+    /* About Section */
     .about-section {
       background: linear-gradient(135deg, #f9fafb, #eef2ff);
       padding: 80px 20px;
@@ -504,7 +387,111 @@
       color: #4f46e5;
     }
 
+    /* FAQ Section */
+    .FAQ {
+      padding: 60px 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .faq-container h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .faq-item {
+      margin-bottom: 1rem;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 1rem;
+    }
+    
+    .faq-question {
+      cursor: pointer;
+      padding: 1rem 0;
+    }
+    
+    .faq-answer {
+      padding: 0 1rem;
+      display: none;
+    }
+    
+    .faq-item.active .faq-answer {
+      display: block;
+    }
 
+    /* Contact Section */
+    .contactus {
+      padding: 60px 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    
+    .contactus .header {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .container2 {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    
+    .contact-form, .contact-details {
+      flex: 1;
+      min-width: 300px;
+    }
+    
+    .contact-form h3, .contact-details h3 {
+      margin-bottom: 1.5rem;
+    }
+    
+    .contact-form input, 
+    .contact-form textarea {
+      width: 100%;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+    }
+    
+    .contact-form button {
+      background: #4f46e5;
+      color: white;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .cube-container {
+        width: 150px;
+        height: 150px;
+      }
+      .front { transform: translateZ(75px); }
+      .back { transform: translateZ(-75px) rotateY(180deg); }
+      .right { transform: translateX(75px) rotateY(90deg); }
+      .left { transform: translateX(-75px) rotateY(-90deg); }
+      .top { transform: translateY(-75px) rotateX(90deg); }
+      .bottom { transform: translateY(75px) rotateX(-90deg); }
+      
+      .cognix-text {
+        font-size: 3.5rem;
+      }
+      
+      .btn-primary {
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+      }
+      
+      .nav-quiz-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -525,24 +512,34 @@
     </div>
   </nav>
 
-  <!-- Hero Section -->
-  <!-- Hero Section -->
-<!-- Hero Section -->
-<section class="hero" id="section1">
-  <div class="container">
-    <div class="home">
-      <h1 class="hero-title">
-        <span class="welcome-text">Welcome to</span>
-        <span class="cognix-text">COGNIX</span>
-      </h1>
-      <h3 class="hero-subtitle">AI-Powered Smart Quiz Generator</h3>
+  <!-- Hero Section with Cube -->
+  <section class="hero" id="section1">
+    <!-- 3D Cube Background Element -->
+    <div class="cube-container">
+      <div class="box-card">
+        <div class="face front">WELCOME</div>
+        <div class="face back">COGNIX</div>
+        <div class="face right">MCQ GENERATION</div>
+        <div class="face left">AI POWERED</div>
+        <div class="face top"></div>
+        <div class="face bottom"></div>
+      </div>
     </div>
-    <button class="btn-primary" id="heroQuizBtn">
-      <span>Start Quiz Now</span>
-    </button>
-  </div>
-</section>
 
+    <!-- Hero Content -->
+    <div class="container">
+      <div class="home">
+        <h1 class="hero-title">
+          <span class="welcome-text">Welcome to</span>
+          <span class="cognix-text">COGNIX</span>
+        </h1>
+        <h3 class="hero-subtitle">AI-Powered Smart Quiz Generator</h3>
+      </div>
+      <button class="btn-primary" id="heroQuizBtn">
+        <span>Start Quiz Now</span>
+      </button>
+    </div>
+  </section>
 
   <!-- Quiz Section -->
   <section class="quiz-container" id="quiz-section">
@@ -583,44 +580,42 @@
   </section>
 
   <!-- About Section -->
-<section class="about-section" id="section2">
-  <div class="about-header">
-    <h2>About <span>COGNIX</span></h2>
-    <p class="tagline">Smarter Learning. Faster Results.</p>
-  </div>
-
-  <div class="about-container">
-    <div class="about-content">
-      <p>
-        At <strong>COGNIX</strong>, we believe learning should be 
-        <span class="highlight">interactive</span>, 
-        <span class="highlight">personalized</span>, 
-        and <span class="highlight">AI-driven</span>.
-      </p>
-      <p>
-        Our mission is to empower students, professionals, and lifelong learners to 
-        master any topic with <strong>smart, adaptive quizzes</strong>.
-      </p>
-
-      <ul class="features">
-        <li>⚡ <strong>Accurate & dynamic</strong> question generation</li>
-        <li>📊 <strong>Instant feedback</strong> to track progress</li>
-        <li>🎯 <strong>Insights</strong> into strengths & weaknesses</li>
-      </ul>
-
-      <p>
-        We make exam preparation:
-      </p>
-      <ul class="benefits">
-        <li><span>🚀 Faster</span>  No more hunting for quality practice questions</li>
-        <li><span>🧠 Smarter</span>  AI adapts to your learning style</li>
-        <li><span>🎮 Engaging</span> Interactive UI keeps you motivated</li>
-      </ul>
+  <section class="about-section" id="section2">
+    <div class="about-header">
+      <h2>About <span>COGNIX</span></h2>
+      <p class="tagline">Smarter Learning. Faster Results.</p>
     </div>
-  </div>
-</section>
 
+    <div class="about-container">
+      <div class="about-content">
+        <p>
+          At <strong>COGNIX</strong>, we believe learning should be 
+          <span class="highlight">interactive</span>, 
+          <span class="highlight">personalized</span>, 
+          and <span class="highlight">AI-driven</span>.
+        </p>
+        <p>
+          Our mission is to empower students, professionals, and lifelong learners to 
+          master any topic with <strong>smart, adaptive quizzes</strong>.
+        </p>
 
+        <ul class="features">
+          <li>⚡ <strong>Accurate & dynamic</strong> question generation</li>
+          <li>📊 <strong>Instant feedback</strong> to track progress</li>
+          <li>🎯 <strong>Insights</strong> into strengths & weaknesses</li>
+        </ul>
+
+        <p>
+          We make exam preparation:
+        </p>
+        <ul class="benefits">
+          <li><span>🚀 Faster</span>  No more hunting for quality practice questions</li>
+          <li><span>🧠 Smarter</span>  AI adapts to your learning style</li>
+          <li><span>🎮 Engaging</span> Interactive UI keeps you motivated</li>
+        </ul>
+      </div>
+    </div>
+  </section>
 
   <!-- FAQ Section -->
   <section class="FAQ">
